@@ -23,7 +23,7 @@ namespace snake_ai {
                 posY++;
             }
 
-            snek = new Snake();
+            snek = new Snake(this);
         }
 
         public void draw(PaintEventArgs e) {
