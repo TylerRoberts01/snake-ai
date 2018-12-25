@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace snake_ai {
-    public class Program {
-        public static void Main(string[] args) {
+namespace snake_ai
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
             Application.Run(new SnakeApp());
         }
     }
