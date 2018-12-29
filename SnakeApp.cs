@@ -11,17 +11,16 @@ namespace snake_ai
 {
     public partial class SnakeApp : System.Windows.Forms.Form
     {
-        State map;
+        Episode episode;
 
-        public SnakeApp()
+        public SnakeApp(Episode episode)
         {
             InitializeComponent();
-            map = new State(5, 5);
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            map.Draw(e);
+            episode.Draw(e);
         }
 
         private void Form1_Load(object sender, EventArgs e)

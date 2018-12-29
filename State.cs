@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -8,59 +9,90 @@ namespace snake_ai
 {
     public class State
     {
-        private List<List<Node>> map;
+        private List<List<int>> map;
         private Snake snek;
-        private int xSize;
-        private int ySize;
+        private Tuple<int, int> size;
 
         public State(int r, int c)
         {
             snek = new Snake(this);
-            map = new List<List<Node>>();
-            xSize = c;
-            ySize = r;
-
-            int posY = 0;
+            map = new List<List<int>>();
+            size = new Tuple<int, int>(r, c);
+            
             for (int y = 0; y < r; y++)
             {
-                map.Add(new List<Node>());
-                int posX = 0;
-
+                map.Add(new List<int>());
                 for (int x = 0; x < c; x++)
                 {
-                    map[y].Add(new Node(0, posX++ * 10, posY * 10));
+                    map[0].Add(0);
                 }
-
-                posY++;
             }
+        }
+
+        public State(State state)
+        {
+            snek = new Snake(this);
+            map = new List<List<int>>(state.map);
+            size = new Tuple<int, int>(state.size.Item1, state.size.Item2);
         }
 
         public void Draw(PaintEventArgs e)
         {
-            foreach (List<Node> l in map)
+            foreach (List<int> list in map)
             {
-                foreach(Node n in l)
+                foreach (int pos in list)
                 {
-                    n.Draw(e);
+                    Draw(pos, e);
                 }
             }
         }
 
+        private void Draw(int type, PaintEventArgs e)
+        {
+            SolidBrush brush;
+            switch (type)
+            {
+                case 0:
+                    brush = new SolidBrush(Color.Black);
+                    break;
+                case 1:
+                case 2:
+                    brush = new SolidBrush(Color.Green);
+                    break;
+                default:
+                    brush = new SolidBrush(Color.Red);
+                    break;
+            }
+            e.Graphics.FillRectangle(brush, new RectangleF(x, y, 9, 9));
+            brush.Dispose();
+        }
+
         public void Update(Tuple<int, int> pos, int type)
         {
-            map[pos.Item1][pos.Item2].SetType(type);
+            map[pos.Item1][pos.Item2] = type;
         }
 
         public Tuple<int, int> GetSize()
         {
-            return new Tuple<int, int>(xSize, ySize);
+            return new Tuple<int, int>(size.Item1, size.Item2);
+        }
+
+        public List<List<int>> CopyMap()
+        {
+            return new List<List<int>>(map);
         }
 
         public override string ToString()
         {
             string result = "";
 
-            map.Select(l => l.Select(n => result += n.ToString()));
+            foreach (List<int> list in map)
+            {
+                foreach (int pos in list)
+                {
+                    result += pos;
+                }
+            }
 
             return result;
         }

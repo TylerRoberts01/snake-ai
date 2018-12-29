@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 
 namespace snake_ai
 {
@@ -10,7 +9,13 @@ namespace snake_ai
     {
         public static void Main(string[] args)
         {
-            Application.Run(new SnakeApp());
+            var season = new List<Episode>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                season.Add(new Episode());
+                season[i].Play();
+            }
         }
     }
 }
