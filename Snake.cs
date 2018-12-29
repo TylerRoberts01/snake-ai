@@ -28,9 +28,19 @@ namespace snake_ai {
             }
         }
 
-        public void Update()
+        public void Think()
         {
             currentDirection = brain.GetAction(currentDirection);
+        }
+
+        public void Update()
+        {
+            Think();
+            Update(currentDirection);
+        }
+
+        public void Update(int dir)
+        {
             pos = Update(pos, currentDirection);
 
             Tuple<int, int> currentPos = Update(pos, 0);
@@ -52,16 +62,16 @@ namespace snake_ai {
             int y = pos.Item2;
             switch (dir)
             {
-                case -2:
+                case -2: // down
                     y--;
                     break;
-                case -1:
+                case -1: // left
                     x--;
                     break;
-                case 1:
+                case 1: // right
                     x++;
                     break;
-                case 2:
+                case 2: // up
                     y++;
                     break;
                 default:

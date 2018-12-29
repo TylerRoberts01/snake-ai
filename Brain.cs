@@ -8,7 +8,6 @@ namespace snake_ai {
     {
         private Dictionary<string, Tuple<int, double>> table;
         private State state;
-        private double learningRate = 1;
         private readonly double discount = .8;
         private readonly List<int> actions = new List<int> { -2, -1, 1, 2 };
 
@@ -20,34 +19,83 @@ namespace snake_ai {
 
         public int GetAction(int currentDirection)
         {
-            Simulate(state.CopyMap(), currentDirection, discount);
-            learningRate *= .97;
+            Simulate(new State(state), currentDirection, discount);
 
             return table[state.ToString()].Item1;
         }
 
-        private Tuple<int, double> Simulate(List<List<int>> map, int currentDirection, double discount)
+        private Tuple<int, double> Simulate(State state, int currentDirection, double discount)
         {
-            if (discount < .05)
+            if (discount < .05) // rewards negligible due to discount
             {
-                return new Tuple<int, int>(0, 0);
+                table[state.ToString()] = new Tuple<int, double>(0, 0);
+                return new Tuple<int, double>(0, 0);
             }
 
-            var actionAndReward = new Tuple<int, double>(0, 0);
+            int bestAction = 0;
+            double bestReward = 0;
 
             foreach (int action in actions.Where(a => a != -currentDirection).ToArray<int>())
             {
-                double reward = (1 - learningRate) * r
+                double reward = InstantReward(state.CopyMap(), currentDirection) + discount * Simulate(new State(state), action, Math.Pow(discount, 2)).Item2;
+
+                if (reward > bestReward)
+                {
+                    bestAction = action;
+                    bestReward = reward;
+                }
             }
 
-            table[state.ToString()] = actionAndReward;
+            table[state.ToString()] = new Tuple<int, double>(bestAction, bestReward);
 
             return table[state.ToString()];
         }
 
         private double InstantReward(List<List<int>> map, int direction)
         {
-            var headPos = new Tuple<int, int>(map.FindIndex()
+            int headRow = map.FindIndex(l => l.Contains(1));
+            int headCol = map[headRow].FindIndex(x => x == 1);
+
+            int nextRow = headRow;
+            int nextCol = headCol;
+
+            switch (direction)
+            {
+                case -2: // down
+                    nextRow--;
+                    break;
+                case -1: // left
+                    nextCol--;
+                    break;
+                case 1: // right
+                    nextCol++;
+                    break;
+                case 2: // up
+                    nextRow++;
+                    break;
+                default:
+                    break;
+            }
+            
+            if (nextRow < 0 || nextRow >= map.Count() || nextCol < 0 || nextCol >= map[0].Count()) // Going to crash into wall
+            {
+                return -20;
+            }
+
+            if (map[nextRow][nextCol] == 2) // Going to crash into self
+            {
+                return -20;
+            }
+
+            if (map[nextRow][nextCol] == 3) // Going to eat food
+            {
+                return 5;
+            }
+
+            int foodRow = map.FindIndex(l => l.Contains(3));
+            int foodCol = map[headRow].FindIndex(x => x == 3);
+
+            return 1 / (Math.Abs(nextRow - foodRow) + Math.Abs(nextCol - foodCol)); // Distance to food
         }
     }
 }

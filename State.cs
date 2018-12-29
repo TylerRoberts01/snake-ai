@@ -38,6 +38,7 @@ namespace snake_ai
 
         public void Draw(PaintEventArgs e)
         {
+            snek.Update();
             foreach (List<int> list in map)
             {
                 foreach (int pos in list)
@@ -52,14 +53,14 @@ namespace snake_ai
             SolidBrush brush;
             switch (type)
             {
-                case 0:
+                case 0: // blank
                     brush = new SolidBrush(Color.Black);
                     break;
-                case 1:
-                case 2:
+                case 1: // head
+                case 2: // segment
                     brush = new SolidBrush(Color.Green);
                     break;
-                default:
+                default: // food
                     brush = new SolidBrush(Color.Red);
                     break;
             }
