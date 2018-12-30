@@ -6,7 +6,6 @@ using System.Text;
 namespace snake_ai {
     public class Brain
     {
-        private Dictionary<string, Tuple<int, double>> table;
         private State state;
         private readonly double discount = .9;
         private double learningRate = 1;
@@ -14,27 +13,17 @@ namespace snake_ai {
 
         public Brain(State state)
         {
-            table = new Dictionary<string, Tuple<int, double>>();
             this.state = state;
         }
 
         public int GetAction(int currentDirection)
         {
-            if (new Random().NextDouble() >= learningRate && table.TryGetValue(state.ToString(), out Tuple<int, double> actionAndReward) && actionAndReward.Item1 != 0)
-            {
-                return actionAndReward.Item1;
-            }
-
-            table[state.ToString()] = Simulate(new State(state), currentDirection, discount);
-
-            learningRate *= .97;
-
-            return table[state.ToString()].Item1;
+            return Simulate(new State(state), currentDirection, discount).Item1;
         }
 
         private Tuple<int, double> Simulate(State state, int currentDirection, double discount)
         {
-            if (discount < .05) // rewards negligible due to discount
+            if (discount < .05 || state.lost) // rewards negligible due to discount or state is lost
             {
                 return new Tuple<int, double>(0, 0);
             }
@@ -103,10 +92,16 @@ namespace snake_ai {
 
             if (map[nextRow][nextCol] == 3) // Going to eat food
             {
-                return 25;
+                return 40;
             }
 
             int foodRow = map.FindIndex(l => l.Contains(3));
+
+            if (foodRow < 0)
+            {
+                return -50;
+            }
+
             int foodCol = map[foodRow].FindIndex(x => x == 3);
 
             return 1.0 / (Math.Abs((double)(nextRow - foodRow)) + Math.Abs((double)(nextCol - foodCol))); // Distance to food

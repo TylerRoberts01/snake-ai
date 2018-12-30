@@ -68,8 +68,15 @@ namespace snake_ai
             points = state.points;
         }
 
-        public void Draw(PaintEventArgs e)
+        public bool Draw(PaintEventArgs e)
         {
+            if (map.Where(x => x.Contains(1)).Count() <= 0)
+            {
+                lost = true;
+            }
+
+            if (lost) return false;
+
             snake.Update();
             int row = 0;
             int col = 0;
@@ -79,11 +86,13 @@ namespace snake_ai
                 foreach (int type in list)
                 {
                     Draw(type, row, col, e);
-                    col += 10;
+                    col++;
                 }
-                row += 10;
+                row++;
                 col = 0;
             }
+
+            return true;
         }
 
         private void Draw(int type, int row, int col, PaintEventArgs e)
@@ -104,13 +113,13 @@ namespace snake_ai
                     brush = new SolidBrush(Color.Red);
                     break;
             }
-            e.Graphics.FillRectangle(brush, new RectangleF(col, row, 9, 9));
+            e.Graphics.FillRectangle(brush, new RectangleF(col * 19, row * 19, 18, 18));
             brush.Dispose();
         }
 
         public void Update(Tuple<int, int> pos, int type)
         {
-            if (pos.Item1 < 0 || pos.Item1 >= size.Item1 || pos.Item2 < 0 || pos.Item2 >= size.Item2)
+            if (type == 1 && (pos.Item1 < 0 || pos.Item1 >= size.Item1 || pos.Item2 < 0 || pos.Item2 >= size.Item2))
             {
                 lost = true;
                 return;

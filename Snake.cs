@@ -50,7 +50,13 @@ namespace snake_ai {
             bool grow = false;
             for (int i = 0; i < length; i++)
             {
-                if (state.CopyMap()[pos.Item1][pos.Item2] == 3 && i == 0)
+                if (i == 0 && (currentPos.Item1 < 0 || currentPos.Item1 >= state.GetSize().Item1 || currentPos.Item2 < 0 || currentPos.Item2 >= state.GetSize().Item2))
+                {
+                    state.lost = true;
+                    return;
+                }
+
+                if (state.CopyMap()[currentPos.Item1][currentPos.Item2] == 3 && i == 0)
                 {
                     state.points *= 100;
                     state.PlaceFood();
@@ -97,11 +103,6 @@ namespace snake_ai {
             }
 
             return new Tuple<int, int>(row, col);
-        }
-
-        public void Grow()
-        {
-
         }
     }
 }

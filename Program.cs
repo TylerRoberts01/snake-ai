@@ -10,7 +10,7 @@ namespace snake_ai
     {
         public static void Main(string[] args)
         {
-            Application.Run(new SnakeApp(new State(11, 11)));
+            Application.Run(new SnakeApp());
         }
     }
 }

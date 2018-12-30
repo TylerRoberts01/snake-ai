@@ -13,21 +13,21 @@ namespace snake_ai
     {
         private State state;
 
-        public SnakeApp(State state)
+        public SnakeApp()
         {
-            this.state = state;
+            this.state = new State(11, 11);
             InitializeComponent();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (!state.lost)
+            base.OnPaint(e);
+            if (!state.Draw(e))
             {
-                base.OnPaint(e);
-                state.Draw(e);
-                Wait(200);
-                Invalidate();
+                state = new State(11, 11);
             }
+            Wait(200);
+            Invalidate();
         }
 
         private void Form1_Load(object sender, EventArgs e)
