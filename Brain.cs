@@ -9,7 +9,7 @@ namespace snake_ai {
         private Dictionary<string, Tuple<int, double>> table;
         private State state;
         private readonly double discount = .9;
-        private readonly double learningRate = 1;
+        private double learningRate = 1;
         private readonly List<int> actions = new List<int> { -2, -1, 1, 2 };
 
         public Brain(State state)
@@ -26,6 +26,8 @@ namespace snake_ai {
             }
 
             table[state.ToString()] = Simulate(new State(state), currentDirection, discount);
+
+            learningRate *= .97;
 
             return table[state.ToString()].Item1;
         }
@@ -60,6 +62,12 @@ namespace snake_ai {
         private double InstantReward(List<List<int>> map, int direction, string key)
         {
             int headRow = map.FindIndex(l => l.Contains(1));
+
+            if (headRow < 0)
+            {
+                return -50;
+            }
+
             int headCol = map[headRow].FindIndex(x => x == 1);
 
             int nextRow = headRow;
