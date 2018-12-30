@@ -13,12 +13,7 @@ namespace snake_ai
 
         public Episode()
         {
-            this.state = new State(5, 5);
-        }
-
-        public void Play()
-        {
-            Application.Run(new SnakeApp(this));
+            this.state = new State(20, 20);
         }
 
         public void Draw(PaintEventArgs e)

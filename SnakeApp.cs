@@ -11,21 +11,52 @@ namespace snake_ai
 {
     public partial class SnakeApp : System.Windows.Forms.Form
     {
-        Episode episode;
+        private State state;
 
-        public SnakeApp(Episode episode)
+        public SnakeApp(State state)
         {
+            this.state = state;
             InitializeComponent();
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        protected override void OnPaint(PaintEventArgs e)
         {
-            episode.Draw(e);
+            if (!state.lost)
+            {
+                base.OnPaint(e);
+                state.Draw(e);
+                Wait(200);
+                Invalidate();
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void Wait(int ms)
+        {
+            Timer timer = new Timer();
+
+            if (ms == 0 || ms < 0)
+            {
+                return;
+            }
+
+            timer.Interval = ms;
+            timer.Enabled = true;
+            timer.Start();
+            timer.Tick += (s, e) =>
+            {
+                timer.Enabled = false;
+                timer.Stop();
+            };
+
+            while (timer.Enabled)
+            {
+                Application.DoEvents();
+            }
         }
     }
 }

@@ -8,8 +8,8 @@ namespace snake_ai {
     {
         private State state;
         private Brain brain;
-        private List<int> moves;
-        private int length;
+        private LinkedList<int> moves;
+        public int length;
         private int currentDirection; // rl = +/-1, ud = +/-2
         private Tuple<int, int> pos;
 
@@ -17,14 +17,14 @@ namespace snake_ai {
         {
             this.state = state;
             this.brain = new Brain(state);
-            moves = new List<int>();
-            length = 5;
+            moves = new LinkedList<int>();
+            length = 2;
             currentDirection = 1;
             pos = new Tuple<int, int>(state.GetSize().Item1 / 2, state.GetSize().Item2 / 2);
 
             for (int i = 0; i < length; i++)
             {
-                moves.Add(currentDirection);
+                moves.AddLast(currentDirection);
             }
         }
 
@@ -41,44 +41,67 @@ namespace snake_ai {
 
         public void Update(int dir)
         {
-            pos = Update(pos, currentDirection);
+            pos = Update(pos, dir);
 
             Tuple<int, int> currentPos = Update(pos, 0);
 
-            moves.Add(currentDirection);
+            moves.AddFirst(dir);
 
+            bool grow = false;
             for (int i = 0; i < length; i++)
             {
+                if (state.CopyMap()[pos.Item1][pos.Item2] == 3 && i == 0)
+                {
+                    state.points *= 100;
+                    state.PlaceFood();
+                    grow = true;
+                }
+
                 state.Update(currentPos, i == 0 ? 1 : 2);
-                currentPos = Update(currentPos, -moves[i]);
+                currentPos = Update(currentPos, -moves.First.Value);
+                moves.AddLast(moves.First.Value);
+                moves.RemoveFirst();
+
+                if (grow && i == length - 1)
+                {
+                    length++;
+                    moves.AddFirst(moves.First.Value);
+                    grow = false;
+                }
             }
 
             state.Update(currentPos, 0);
+            moves.RemoveFirst();
         }
 
         private Tuple<int, int> Update(Tuple<int, int> pos, int dir)
         {
-            int x = pos.Item1;
-            int y = pos.Item2;
+            int row = pos.Item1;
+            int col = pos.Item2;
             switch (dir)
             {
                 case -2: // down
-                    y--;
+                    row--;
                     break;
                 case -1: // left
-                    x--;
+                    col--;
                     break;
                 case 1: // right
-                    x++;
+                    col++;
                     break;
                 case 2: // up
-                    y++;
+                    row++;
                     break;
                 default:
                     break;
             }
 
-            return new Tuple<int, int>(x, y);
+            return new Tuple<int, int>(row, col);
+        }
+
+        public void Grow()
+        {
+
         }
     }
 }

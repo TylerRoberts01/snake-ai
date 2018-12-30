@@ -8,7 +8,8 @@ namespace snake_ai {
     {
         private Dictionary<string, Tuple<int, double>> table;
         private State state;
-        private readonly double discount = .8;
+        private readonly double discount = .9;
+        private readonly double learningRate = 1;
         private readonly List<int> actions = new List<int> { -2, -1, 1, 2 };
 
         public Brain(State state)
@@ -19,7 +20,12 @@ namespace snake_ai {
 
         public int GetAction(int currentDirection)
         {
-            Simulate(new State(state), currentDirection, discount);
+            if (new Random().NextDouble() >= learningRate && table.TryGetValue(state.ToString(), out Tuple<int, double> actionAndReward) && actionAndReward.Item1 != 0)
+            {
+                return actionAndReward.Item1;
+            }
+
+            table[state.ToString()] = Simulate(new State(state), currentDirection, discount);
 
             return table[state.ToString()].Item1;
         }
@@ -28,16 +34,18 @@ namespace snake_ai {
         {
             if (discount < .05) // rewards negligible due to discount
             {
-                table[state.ToString()] = new Tuple<int, double>(0, 0);
                 return new Tuple<int, double>(0, 0);
             }
 
             int bestAction = 0;
             double bestReward = 0;
+            string mapString = state.ToString();
 
             foreach (int action in actions.Where(a => a != -currentDirection).ToArray<int>())
             {
-                double reward = InstantReward(state.CopyMap(), currentDirection) + discount * Simulate(new State(state), action, Math.Pow(discount, 2)).Item2;
+                State next = new State(state);
+                next.snake.Update(action);
+                double reward = InstantReward(state.CopyMap(), action, mapString) + discount * Simulate(next, action, Math.Pow(discount, 2)).Item2;
 
                 if (reward > bestReward)
                 {
@@ -46,12 +54,10 @@ namespace snake_ai {
                 }
             }
 
-            table[state.ToString()] = new Tuple<int, double>(bestAction, bestReward);
-
-            return table[state.ToString()];
+            return new Tuple<int, double>(bestAction, bestReward);
         }
 
-        private double InstantReward(List<List<int>> map, int direction)
+        private double InstantReward(List<List<int>> map, int direction, string key)
         {
             int headRow = map.FindIndex(l => l.Contains(1));
             int headCol = map[headRow].FindIndex(x => x == 1);
@@ -79,23 +85,23 @@ namespace snake_ai {
             
             if (nextRow < 0 || nextRow >= map.Count() || nextCol < 0 || nextCol >= map[0].Count()) // Going to crash into wall
             {
-                return -20;
+                return -50;
             }
 
             if (map[nextRow][nextCol] == 2) // Going to crash into self
             {
-                return -20;
+                return -50;
             }
 
             if (map[nextRow][nextCol] == 3) // Going to eat food
             {
-                return 5;
+                return 25;
             }
 
             int foodRow = map.FindIndex(l => l.Contains(3));
-            int foodCol = map[headRow].FindIndex(x => x == 3);
+            int foodCol = map[foodRow].FindIndex(x => x == 3);
 
-            return 1 / (Math.Abs(nextRow - foodRow) + Math.Abs(nextCol - foodCol)); // Distance to food
+            return 1.0 / (Math.Abs((double)(nextRow - foodRow)) + Math.Abs((double)(nextCol - foodCol))); // Distance to food
         }
     }
 }
